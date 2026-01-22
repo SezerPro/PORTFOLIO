@@ -1,16 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PORTFOLIO</title>
+    <title>Portfolio - Sezer Dogan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <nav>
-       <ul>
-           <li><a href="#about">About Me</a></li>
-           <li><a href="#projects">Projects</a></li>
-           <li><a href="#contact">Contact</a></li>
-       </ul>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="logo">SD.</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#about">&Agrave; propos</a></li>
+                    <li><a href="#projects">Projets</a></li>
+                    <li><a href="#skills">Comp&eacute;tences</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="about" class="hero">
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <p class="eyebrow">Disponible pour de nouvelles collaborations</p>
+                    <h1>Sezer Dogan</h1>
+                    <p class="lede">D&eacute;veloppeur web junior bas&eacute; en France. Je con&ccedil;ois des exp&eacute;riences digitales &eacute;l&eacute;gantes, performantes et faciles &agrave; maintenir.</p>
+                    <div class="cta-row">
+                        <a class="cta" href="#projects">Voir mes projets</a>
+                        <a class="ghost-btn" href="#contact">Parlons-en</a>
+                    </div>
+                    <div class="meta-row">
+                        <span class="pill">Front-end</span>
+                        <span class="pill">Back-end</span>
+                        <span class="pill">UI thinking</span>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <div class="avatar">SD</div>
+                    <div class="hero-card-body">
+                        <p class="muted">Passionn&eacute; par les interfaces sobres, le code clair et l'it&eacute;ration rapide. Actuellement focus sur React, Node.js et les bonnes pratiques d'accessibilit&eacute;.</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="stat-number">5</span>
+                                <span class="stat-label">projets livr&eacute;s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">10+</span>
+                                <span class="stat-label">maquettes r&eacute;alis&eacute;es</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="panel">
+            <div class="section-title">
+                <h2>Projets</h2>
+                <span class="dash"></span>
+            </div>
+            <ul class="project-grid">
+                <li class="project-card">
+                    <div class="card-head">
+                        <p class="pill strong">2024</p>
+                        <div class="tag-row">
+                            <span class="tag">HTML/CSS</span>
+                            <span class="tag">JavaScript</span>
+                        </div>
+                    </div>
+                    <h3>Blog personnel</h3>
+                    <p>Un blog responsive avec typographie travaill&eacute;e, navigation sticky et animations douces.</p>
+                </li>
+                <li class="project-card">
+                    <div class="card-head">
+                        <p class="pill strong">2025</p>
+                        <div class="tag-row">
+                            <span class="tag">React</span>
+                            <span class="tag">Node.js</span>
+                            <span class="tag">API</span>
+                        </div>
+                    </div>
+                    <h3>Prototype e-commerce</h3>
+                    <p>Parcours produit fluide avec filtrage, panier dynamique et pages optimis&eacute;es pour la conversion.</p>
+                </li>
+            </ul>
+        </section>
+
+        <section id="skills" class="panel">
+            <div class="section-title">
+                <h2>Comp&eacute;tences</h2>
+                <span class="dash"></span>
+            </div>
+            <div class="skills-grid">
+                <span class="pill strong">HTML5</span>
+                <span class="pill strong">CSS3 / Tailwind</span>
+                <span class="pill strong">JavaScript</span>
+                <span class="pill strong">React</span>
+                <span class="pill strong">Node.js</span>
+                <span class="pill strong">Express</span>
+                <span class="pill strong">UI prototyping</span>
+                <span class="pill strong">Git / GitHub</span>
+            </div>
+            <p class="muted">Je cherche toujours &agrave; am&eacute;liorer mes pratiques (tests, accessibilit&eacute;, performance) pour livrer des produits fiables.</p>
+        </section>
+
+        <section id="contact" class="panel contact-panel">
+            <div class="section-title">
+                <h2>Contact</h2>
+                <span class="dash"></span>
+            </div>
+            <div class="contact-layout">
+                <div class="contact-info">
+                    <p>Un projet en t&ecirc;te ou envie d'&eacute;changer ? Pr&eacute;sentez votre besoin, l'audience cibl&eacute;e et vos d&eacute;lais : je reviens vers vous rapidement avec des pistes concr&egrave;tes.</p>
+                    <div class="contact-card-list">
+                        <div class="contact-card">
+                            <h3>Email</h3>
+                            <a class="link-accent" href="mailto:sezer.dogan.pro@gmail.com">sezer.dogan.pro@gmail.com</a>
+                        </div>
+                        <div class="contact-card">
+                            <h3>Fuseau horaire</h3>
+                            <p>Europe/Paris (CET)</p>
+                        </div>
+                        <div class="contact-card">
+                            <h3>Disponibilit&eacute;</h3>
+                            <p>Mission courte ou support continu, &agrave; partir de cette semaine.</p>
+                        </div>
+                    </div>
+                    <p class="muted">Envoyez maquettes, cahier des charges ou inspirations : chaque d&eacute;tail aide &agrave; aller plus vite.</p>
+                </div>
+                <form class="contact-form" action="https://formspree.io/f/xnnekoye" method="POST">
+                    <div class="field">
+                        <label for="name">Nom</label>
+                        <input type="text" id="name" name="name" placeholder="Votre nom" required>
+                    </div>
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="vous@email.com" required>
+                    </div>
+                    <div class="field">
+                        <label for="project">Sujet</label>
+                        <input type="text" id="project" name="project" placeholder="Refonte site, MVP, mission..." required>
+                    </div>
+                    <div class="field">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Pr&eacute;sentez le contexte, l'audience et les attentes" required></textarea>
+                    </div>
+                    <div class="submit-row">
+                        <button type="submit" class="cta">Envoyer</button>
+                        <span class="muted helper">R&eacute;ponse sous 24h (hors week-end).</span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2024 Sezer Dogan &mdash; Portfolio</p>
+    </footer>
 </body>
+
 </html>
