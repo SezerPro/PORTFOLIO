@@ -1,13 +1,49 @@
 :root {
-    --bg: #0b1224;
-    --bg-soft: #101a33;
-    --card: #0f1b35;
-    --accent: #f59e0b;
-    --accent-2: #60a5fa;
-    --text: #e5e7eb;
-    --muted: #a5b4c7;
+    color-scheme: light;
+    --bg: #f6f4f1;
+    --bg-soft: #eef1f6;
+    --card: #ffffff;
+    --card-strong: #f8fafc;
+    --accent: #2f6fed;
+    --accent-2: #14b8a6;
+    --text: #1b2430;
+    --muted: #5b6678;
+    --line: rgba(27, 36, 48, 0.12);
+    --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+    --glow-1: rgba(47, 111, 237, 0.12);
+    --glow-2: rgba(20, 184, 166, 0.12);
+    --surface: rgba(27, 36, 48, 0.04);
+    --surface-strong: rgba(27, 36, 48, 0.08);
+    --accent-soft: rgba(47, 111, 237, 0.18);
+    --accent-border: rgba(47, 111, 237, 0.35);
+    --header-bg: rgba(246, 244, 241, 0.9);
+    --pill-strong-bg: linear-gradient(120deg, rgba(47, 111, 237, 0.18), rgba(20, 184, 166, 0.18));
+    --cta-text: #ffffff;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0b1120;
+    --bg-soft: #0f1a2d;
+    --card: #121b2e;
+    --card-strong: #111c31;
+    --accent: #6aa7ff;
+    --accent-2: #5de6d7;
+    --text: #e5ecf5;
+    --muted: #9aa7bf;
     --line: rgba(255, 255, 255, 0.08);
     --shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+    --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.35);
+    --glow-1: rgba(106, 167, 255, 0.18);
+    --glow-2: rgba(93, 230, 215, 0.16);
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-strong: rgba(255, 255, 255, 0.08);
+    --accent-soft: rgba(106, 167, 255, 0.2);
+    --accent-border: rgba(106, 167, 255, 0.4);
+    --header-bg: rgba(11, 17, 32, 0.86);
+    --pill-strong-bg: linear-gradient(120deg, rgba(106, 167, 255, 0.2), rgba(93, 230, 215, 0.2));
+    --cta-text: #ffffff;
 }
 
 *,
@@ -20,8 +56,8 @@ body {
     margin: 0;
     font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
     background:
-        radial-gradient(circle at 20% 20%, rgba(245, 158, 11, 0.1), transparent 30%),
-        radial-gradient(circle at 80% 0%, rgba(96, 165, 250, 0.16), transparent 35%),
+        radial-gradient(circle at 20% 20%, var(--glow-1), transparent 32%),
+        radial-gradient(circle at 80% 0%, var(--glow-2), transparent 38%),
         var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -60,7 +96,7 @@ a {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: rgba(11, 18, 36, 0.8);
+    background: var(--header-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--line);
 }
@@ -79,8 +115,8 @@ a {
     padding: 8px 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.03);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
 }
 
 .nav-links {
@@ -124,7 +160,7 @@ main {
     padding: 56px;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background: linear-gradient(135deg, rgba(15, 27, 53, 0.9), rgba(11, 18, 36, 0.92));
+    background: linear-gradient(135deg, var(--card), var(--card-strong));
     box-shadow: var(--shadow);
     margin-bottom: 32px;
 }
@@ -142,7 +178,7 @@ main {
     gap: 8px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: rgba(245, 158, 11, 0.1);
+    background: var(--accent-soft);
     color: var(--accent);
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -188,7 +224,7 @@ main {
     gap: 8px;
     padding: 8px 14px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface);
     color: var(--text);
     font-weight: 600;
     border: 1px solid var(--line);
@@ -196,8 +232,8 @@ main {
 }
 
 .pill.strong {
-    border-color: rgba(245, 158, 11, 0.4);
-    background: linear-gradient(120deg, rgba(245, 158, 11, 0.14), rgba(96, 165, 250, 0.14));
+    border-color: var(--accent-border);
+    background: var(--pill-strong-bg);
     color: var(--text);
 }
 
@@ -205,7 +241,7 @@ main {
     position: relative;
     padding: 22px;
     border-radius: 18px;
-    background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.16), transparent 60%), rgba(16, 26, 51, 0.9);
+    background: radial-gradient(circle at 20% 20%, var(--glow-2), transparent 60%), var(--card);
     border: 1px solid var(--line);
     box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
     overflow: hidden;
@@ -215,7 +251,7 @@ main {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(140deg, rgba(245, 158, 11, 0.06), transparent 50%);
+    background: linear-gradient(140deg, var(--glow-1), transparent 55%);
     pointer-events: none;
 }
 
@@ -231,13 +267,13 @@ main {
     height: 86px;
     border-radius: 22px;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #0b0b0b;
+    color: #ffffff;
     font-weight: 800;
     font-size: 1.4rem;
     display: grid;
     place-items: center;
     margin-bottom: 16px;
-    box-shadow: 0 12px 36px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 12px 36px rgba(47, 111, 237, 0.28);
 }
 
 .muted {
@@ -254,7 +290,7 @@ main {
 .stat {
     padding: 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: 1px solid var(--line);
 }
 
@@ -275,7 +311,7 @@ main {
     margin-bottom: 28px;
     border-radius: 18px;
     border: 1px solid var(--line);
-    background: rgba(16, 26, 51, 0.85);
+    background: var(--card-strong);
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
 }
 
@@ -309,7 +345,7 @@ main {
 .project-card {
     padding: 22px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(15, 27, 53, 0.9), rgba(16, 26, 51, 0.85));
+    background: linear-gradient(135deg, var(--card), var(--card-strong));
     border: 1px solid var(--line);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -347,7 +383,7 @@ main {
 .project-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow);
-    border-color: rgba(245, 158, 11, 0.4);
+    border-color: var(--accent-border);
 }
 
 .cta {
@@ -357,7 +393,7 @@ main {
     padding: 10px 16px;
     border-radius: 999px;
     background: var(--accent);
-    color: #0b0b0b;
+    color: var(--cta-text);
     font-weight: 700;
     letter-spacing: 0.01em;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -365,7 +401,7 @@ main {
 
 .cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 12px 30px rgba(47, 111, 237, 0.3);
 }
 
 .ghost-btn {
@@ -374,7 +410,7 @@ main {
     gap: 8px;
     padding: 10px 16px;
     border-radius: 999px;
-    border: 1px solid rgba(245, 158, 11, 0.4);
+    border: 1px solid var(--accent-border);
     color: var(--text);
     font-weight: 700;
     background: transparent;
@@ -392,6 +428,78 @@ main {
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 14px;
+}
+
+.testimonials-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.testimonial-card {
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+    display: grid;
+    gap: 10px;
+}
+
+.testimonial-card.is-loading {
+    opacity: 0.7;
+}
+
+.testimonial-text {
+    color: var(--text);
+    font-size: 0.98rem;
+}
+
+.testimonial-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.testimonial-name {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.testimonials-empty {
+    margin-top: 4px;
+}
+
+.skills-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.skill-column {
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: linear-gradient(140deg, var(--card), var(--card-strong));
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.column-head {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.skill-column h3 {
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
 }
 
 .contact-panel {
@@ -425,7 +533,7 @@ main {
     padding: 14px;
     border-radius: 12px;
     border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
 }
 
 .contact-card h3 {
@@ -449,7 +557,7 @@ main {
     padding: 18px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: rgba(15, 27, 53, 0.8);
+    background: var(--card);
 }
 
 .field {
@@ -464,7 +572,8 @@ main {
 }
 
 .contact-form input,
-.contact-form textarea {
+.contact-form textarea,
+.contact-form select {
     width: 100%;
     padding: 12px 14px;
     border-radius: 12px;
@@ -483,8 +592,8 @@ main {
 .contact-form input:focus,
 .contact-form textarea:focus {
     outline: none;
-    border-color: rgba(245, 158, 11, 0.6);
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .contact-form textarea {
@@ -508,6 +617,66 @@ main {
     padding: 28px 0 42px;
     color: var(--muted);
     font-size: 0.95rem;
+}
+
+.page-shell {
+    padding: 48px 0;
+    display: grid;
+    gap: 20px;
+}
+
+.form-panel {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.form-header {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.notice {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--accent-border);
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.notice.error {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.admin-layout {
+    display: grid;
+    gap: 20px;
+}
+
+.admin-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.status-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+}
+
+.status-pill.pending {
+    border-color: var(--accent-border);
+    color: var(--accent);
+}
+
+.status-pill.approved {
+    border-color: rgba(20, 184, 166, 0.45);
+    color: var(--accent-2);
 }
 
 @media (max-width: 720px) {

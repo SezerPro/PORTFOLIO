@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>Laisser un avis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container page-shell">
+        <section class="panel form-panel">
+            <div class="form-header">
+                <h1 data-i18n="title">Laisser un avis</h1>
+                <p class="muted" data-i18n="subtitle">Merci pour votre collaboration. Votre retour compte.</p>
+            </div>
+            <div id="commentNotice" class="notice" hidden></div>
+            <form id="commentForm" class="contact-form">
+                <div class="field">
+                    <label for="name" data-i18n="nameLabel">Nom &amp; pr&eacute;nom</label>
+                    <input type="text" id="name" name="name" placeholder="Votre nom" required>
+                </div>
+                <div class="field">
+                    <label for="comment" data-i18n="commentLabel">Votre commentaire</label>
+                    <textarea id="comment" name="comment" rows="4" placeholder="Partagez votre exp&eacute;rience" required></textarea>
+                </div>
+                <div class="submit-row">
+                    <button type="submit" class="cta" data-i18n="submit">Envoyer mon avis</button>
+                    <span class="muted helper" data-i18n="helper">Publication apr&egrave;s validation.</span>
+                </div>
+            </form>
+        </section>
+    </main>
+    <script src="theme.js"></script>
+    <script src="config.js"></script>
+    <script src="commenter.js"></script>
+</body>
+</html>

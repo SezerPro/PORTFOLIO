@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>Portfolio - Sezer Dogan</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +19,7 @@
                     <li><a href="#about">&Agrave; propos</a></li>
                     <li><a href="#projects">Projets</a></li>
                     <li><a href="#skills">Comp&eacute;tences</a></li>
+                    <li><a href="#testimonials">Avis</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </nav>
@@ -97,17 +99,65 @@
                 <h2>Comp&eacute;tences</h2>
                 <span class="dash"></span>
             </div>
-            <div class="skills-grid">
-                <span class="pill strong">HTML5</span>
-                <span class="pill strong">CSS3 / Tailwind</span>
-                <span class="pill strong">JavaScript</span>
-                <span class="pill strong">React</span>
-                <span class="pill strong">Node.js</span>
-                <span class="pill strong">Express</span>
-                <span class="pill strong">UI prototyping</span>
-                <span class="pill strong">Git / GitHub</span>
+            <div class="skills-columns">
+                <div class="skill-column">
+                    <div class="column-head">
+                        <h3>Front-end</h3>
+                        <p class="muted">Interfaces modernes, performantes et accessibles.</p>
+                    </div>
+                    <div class="skills-grid">
+                        <span class="pill strong">HTML5</span>
+                        <span class="pill strong">CSS3 / Tailwind</span>
+                        <span class="pill strong">JavaScript</span>
+                        <span class="pill strong">React</span>
+                        <span class="pill strong">Angular</span>
+                        <span class="pill strong">UI prototyping</span>
+                        <span class="pill strong">SEO</span>
+                        <span class="pill strong">Accessibilit&eacute; / Performance</span>
+                    </div>
+                </div>
+                <div class="skill-column">
+                    <div class="column-head">
+                        <h3>Back-end</h3>
+                        <p class="muted">APIs robustes et donn&eacute;es bien structur&eacute;es.</p>
+                    </div>
+                    <div class="skills-grid">
+                        <span class="pill strong">Node.js</span>
+                        <span class="pill strong">Express</span>
+                        <span class="pill strong">API REST</span>
+                        <span class="pill strong">PostgreSQL / SQL</span>
+                        <span class="pill strong">Symfony</span>
+                        <span class="pill strong">Python</span>
+                        <span class="pill strong">PHP</span>
+                    </div>
+                </div>
+                <div class="skill-column">
+                    <div class="column-head">
+                        <h3>Outils &amp; pratiques</h3>
+                        <p class="muted">Collaboration, qualit&eacute; et flux de d&eacute;ploiement.</p>
+                    </div>
+                    <div class="skills-grid">
+                        <span class="pill strong">Git / GitHub</span>
+                        <span class="pill strong">Tests &amp; QA</span>
+                        <span class="pill strong">Documentation</span>
+                    </div>
+                </div>
             </div>
             <p class="muted">Je cherche toujours &agrave; am&eacute;liorer mes pratiques (tests, accessibilit&eacute;, performance) pour livrer des produits fiables.</p>
+        </section>
+
+        <section id="testimonials" class="panel testimonials-panel">
+            <div class="section-title">
+                <h2>Avis clients</h2>
+                <span class="dash"></span>
+            </div>
+            <p class="muted">Les retours sont publi&eacute;s apr&egrave;s validation. Merci &agrave; mes clients pour leur confiance.</p>
+            <div class="testimonials-grid" id="testimonialsGrid">
+                <div class="testimonial-card is-loading">
+                    <p class="testimonial-text">Chargement des avis...</p>
+                </div>
+            </div>
+            <p class="muted testimonials-empty" id="testimonialsEmpty" hidden>Aucun avis publi&eacute; pour le moment.</p>
         </section>
 
         <section id="contact" class="panel contact-panel">
@@ -164,6 +214,9 @@
     <footer class="site-footer">
         <p>&copy; 2024 Sezer Dogan &mdash; Portfolio</p>
     </footer>
+    <script src="theme.js"></script>
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="testimonials.js"></script>
 </body>
-
 </html>
