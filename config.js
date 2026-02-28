@@ -4,6 +4,6 @@ window.PORTFOLIO_CONFIG = {
     supabaseUrl: "https://gbwmibibrfcolxsskonj.supabase.co",
     supabaseAnonKey: "sb_publishable_wiCH_QaQvJeDxPpT3WCRdw_d2wI7Jy2",
     apiBase: "",
-    publicSiteUrl: "https://portfolio-omega-livid-3yn3oa9s70.vercel.app",
-    adminEmailAllowlist: ["sezer.dogan.pro@gmail.com"]
+    publicSiteUrl: "https://www.sezer-dogan.dev",
+    adminEmailAllowlist: ["sezer.dogan.pro@gmail.com", "dogan.sezer@hotmail.fr"]
 };
