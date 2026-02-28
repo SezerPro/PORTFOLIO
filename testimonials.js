@@ -44,7 +44,7 @@
         name.textContent = item.client_name || "Client";
 
         const dot = document.createElement("span");
-        dot.textContent = "•";
+        dot.textContent = "\u2022";
 
         const date = document.createElement("span");
         date.textContent = formatDate(item.created_at);
@@ -83,8 +83,11 @@
             empty.hidden = true;
         }
 
-        data.forEach((item) => {
-            grid.appendChild(renderCard(item));
+        data.forEach((item, index) => {
+            const card = renderCard(item);
+            // Ajoute un délai d'animation progressif pour un effet "cascade"
+            card.style.animationDelay = `${index * 100}ms`;
+            grid.appendChild(card);
         });
     };
 

@@ -7,7 +7,20 @@
     const inviteForm = document.getElementById("inviteForm");
     const inviteNotice = document.getElementById("inviteNotice");
     const pendingList = document.getElementById("pendingList");
+    const loadMorePendingBtn = document.getElementById("loadMorePendingBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+
+    const PAGE_SIZE = 20;
+    const POLL_INTERVAL_MS = 45000;
+
+    let pendingItems = [];
+    let pendingOffset = 0;
+    let hasMorePending = false;
+    let isLoadingPending = false;
+    let isLoggingIn = false;
+    let isInviting = false;
+    let pendingPollTimer = null;
+    const approvingIds = new Set();
 
     if (!config.supabaseUrl || !config.supabaseAnonKey || config.supabaseUrl.includes("YOUR_")) {
         if (authNotice) {
@@ -42,6 +55,14 @@
         return allowlist.includes(email.toLowerCase());
     };
 
+    const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+    const clampDays = (value, min, max) => {
+        const parsed = Number.parseInt(String(value), 10);
+        if (!Number.isFinite(parsed)) return min;
+        return Math.max(min, Math.min(max, parsed));
+    };
+
     const buildCommentUrl = (token, language) => {
         const base = config.publicSiteUrl || window.location.origin;
         const url = new URL("/commenter.html", base);
@@ -63,11 +84,27 @@
         if (adminPanel) adminPanel.hidden = !authenticated;
     };
 
+    const stopPendingPolling = () => {
+        if (!pendingPollTimer) return;
+        window.clearInterval(pendingPollTimer);
+        pendingPollTimer = null;
+    };
+
+    const startPendingPolling = () => {
+        stopPendingPolling();
+        pendingPollTimer = window.setInterval(async () => {
+            const session = await requireAdmin();
+            if (!session) return;
+            await loadPending({ reset: true, silent: true });
+        }, POLL_INTERVAL_MS);
+    };
+
     const requireAdmin = async () => {
         const { data } = await client.auth.getSession();
         const session = data?.session;
         if (!session) {
             setAuthenticated(false);
+            stopPendingPolling();
             return null;
         }
 
@@ -75,7 +112,8 @@
         if (!isAllowed(email)) {
             await client.auth.signOut();
             setAuthenticated(false);
-            showNotice(authNotice, "Acc\u00e8s refus\u00e9.", true);
+            stopPendingPolling();
+            showNotice(authNotice, "Acces refuse.", true);
             return null;
         }
 
@@ -83,19 +121,27 @@
         return session;
     };
 
-    const renderPending = (items) => {
+    const updateLoadMoreState = () => {
+        if (!loadMorePendingBtn) return;
+        loadMorePendingBtn.hidden = !hasMorePending || pendingItems.length === 0;
+        loadMorePendingBtn.disabled = isLoadingPending;
+        loadMorePendingBtn.textContent = isLoadingPending ? "Chargement..." : "Charger plus";
+    };
+
+    const renderPending = () => {
         if (!pendingList) return;
         pendingList.innerHTML = "";
 
-        if (!items || items.length === 0) {
+        if (!pendingItems.length) {
             const empty = document.createElement("p");
             empty.className = "muted";
             empty.textContent = "Aucun avis en attente.";
             pendingList.appendChild(empty);
+            updateLoadMoreState();
             return;
         }
 
-        items.forEach((item) => {
+        pendingItems.forEach((item) => {
             const card = document.createElement("div");
             card.className = "testimonial-card";
 
@@ -123,56 +169,112 @@
             approveBtn.className = "cta";
             approveBtn.type = "button";
             approveBtn.textContent = "Publier";
-            approveBtn.addEventListener("click", async () => {
-                approveBtn.disabled = true;
-                const { error } = await client
-                    .from("testimonials")
-                    .update({ status: "approved", approved_at: new Date().toISOString() })
-                    .eq("id", item.id);
-
-                if (error) {
-                    approveBtn.disabled = false;
-                    showNotice(inviteNotice, "Impossible de publier cet avis.", true);
-                    return;
-                }
-                card.remove();
-                if (pendingList.children.length === 0) {
-                    renderPending([]);
-                }
-            });
+            approveBtn.dataset.action = "approve";
+            approveBtn.dataset.id = String(item.id);
+            approveBtn.disabled = approvingIds.has(item.id);
 
             actions.appendChild(approveBtn);
-
             card.append(text, meta, actions);
             pendingList.appendChild(card);
         });
+
+        updateLoadMoreState();
     };
 
-    const loadPending = async () => {
-        if (!pendingList) return;
+    const mergeUniqueById = (existing, incoming) => {
+        const map = new Map(existing.map((item) => [item.id, item]));
+        incoming.forEach((item) => map.set(item.id, item));
+        return Array.from(map.values());
+    };
+
+    const loadPending = async ({ reset = false, silent = false } = {}) => {
+        if (!pendingList || isLoadingPending) return;
+
+        if (reset) {
+            pendingOffset = 0;
+            hasMorePending = false;
+        }
+
+        isLoadingPending = true;
+        updateLoadMoreState();
+
+        const from = pendingOffset;
+        const to = pendingOffset + PAGE_SIZE - 1;
+
         const { data, error } = await client
             .from("testimonials")
             .select("id, client_name, comment, created_at")
             .eq("status", "pending")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .range(from, to);
 
         if (error) {
-            pendingList.innerHTML = "<p class=\"muted\">Impossible de charger les avis.</p>";
+            if (!silent) {
+                pendingList.innerHTML = "<p class=\"muted\">Impossible de charger les avis.</p>";
+            }
+            isLoadingPending = false;
+            updateLoadMoreState();
             return;
         }
 
-        renderPending(data);
+        const page = Array.isArray(data) ? data : [];
+
+        if (reset) {
+            pendingItems = page;
+        } else {
+            pendingItems = mergeUniqueById(pendingItems, page);
+        }
+
+        hasMorePending = page.length === PAGE_SIZE;
+        pendingOffset = from + page.length;
+
+        isLoadingPending = false;
+        renderPending();
+    };
+
+    const approveTestimonial = async (id) => {
+        if (!id || approvingIds.has(id)) return;
+
+        approvingIds.add(id);
+        renderPending();
+
+        const { error } = await client
+            .from("testimonials")
+            .update({ status: "approved", approved_at: new Date().toISOString() })
+            .eq("id", id);
+
+        approvingIds.delete(id);
+
+        if (error) {
+            showNotice(inviteNotice, "Impossible de publier cet avis.", true);
+            renderPending();
+            return;
+        }
+
+        pendingItems = pendingItems.filter((item) => item.id !== id);
+        if (!pendingItems.length && hasMorePending) {
+            await loadPending({ reset: true, silent: true });
+            return;
+        }
+        renderPending();
     };
 
     loginForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (isLoggingIn) return;
+
         hideNotice(authNotice);
+
+        const submitBtn = loginForm.querySelector("button[type='submit']");
         const email = loginForm.adminEmail.value.trim();
 
         if (!isAllowed(email)) {
-            showNotice(authNotice, "Email non autoris\u00e9.", true);
+            showNotice(authNotice, "Email non autorise.", true);
             return;
         }
+
+        isLoggingIn = true;
+        if (submitBtn) submitBtn.disabled = true;
 
         const { error } = await client.auth.signInWithOtp({
             email,
@@ -181,27 +283,58 @@
             }
         });
 
+        isLoggingIn = false;
+        if (submitBtn) submitBtn.disabled = false;
+
         if (error) {
-            showNotice(authNotice, "Connexion impossible. R\u00e9essayez.", true);
+            showNotice(authNotice, "Connexion impossible. Reessayez.", true);
             return;
         }
 
-        showNotice(authNotice, "Lien envoy\u00e9. V\u00e9rifiez votre email.", false);
+        showNotice(authNotice, "Lien envoye. Verifiez votre email.", false);
     });
 
     inviteForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (isInviting) return;
+
         hideNotice(inviteNotice);
+
+        const submitBtn = inviteForm.querySelector("button[type='submit']");
+        if (submitBtn) submitBtn.disabled = true;
+        isInviting = true;
+
         const session = await requireAdmin();
-        if (!session) return;
+        if (!session) {
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
 
         const name = inviteForm.clientName.value.trim();
         const email = inviteForm.clientEmail.value.trim();
         const language = inviteForm.language.value;
-        const expiresDays = parseInt(inviteForm.expires.value, 10) || 7;
+        const expiresDays = clampDays(inviteForm.expires.value, 1, 30);
+        inviteForm.expires.value = String(expiresDays);
 
         if (!name || !email) {
             showNotice(inviteNotice, "Informations manquantes.", true);
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
+
+        if (name.length > 120) {
+            showNotice(inviteNotice, "Nom trop long (120 caracteres max).", true);
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showNotice(inviteNotice, "Email invalide.", true);
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
             return;
         }
 
@@ -218,7 +351,9 @@
         });
 
         if (insertError) {
-            showNotice(inviteNotice, "Impossible de g\u00e9n\u00e9rer le lien.", true);
+            showNotice(inviteNotice, "Impossible de generer le lien.", true);
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
             return;
         }
 
@@ -245,33 +380,43 @@
                 throw new Error("send failed");
             }
 
-            showNotice(
-                inviteNotice,
-                `Invitation envoy\u00e9e. Lien: ${commentUrl}`,
-                false
-            );
+            showNotice(inviteNotice, `Invitation envoyee. Lien: ${commentUrl}`, false);
             inviteForm.reset();
             inviteForm.expires.value = "7";
         } catch (err) {
-            showNotice(inviteNotice, "Invitation cr\u00e9\u00e9e mais email non envoy\u00e9.", true);
+            showNotice(inviteNotice, "Invitation creee mais email non envoye.", true);
+        } finally {
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
         }
+    });
+
+    pendingList?.addEventListener("click", async (event) => {
+        const approveBtn = event.target.closest("button[data-action='approve']");
+        if (!approveBtn) return;
+        await approveTestimonial(approveBtn.dataset.id);
+    });
+
+    loadMorePendingBtn?.addEventListener("click", async () => {
+        await loadPending({ reset: false });
     });
 
     logoutBtn?.addEventListener("click", async () => {
         await client.auth.signOut();
+        stopPendingPolling();
         setAuthenticated(false);
     });
 
     client.auth.onAuthStateChange(async () => {
         const session = await requireAdmin();
-        if (session) {
-            loadPending();
-        }
+        if (!session) return;
+        await loadPending({ reset: true });
+        startPendingPolling();
     });
 
-    requireAdmin().then((session) => {
-        if (session) {
-            loadPending();
-        }
+    requireAdmin().then(async (session) => {
+        if (!session) return;
+        await loadPending({ reset: true });
+        startPendingPolling();
     });
 })();
