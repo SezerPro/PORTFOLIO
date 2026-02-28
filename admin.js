@@ -49,6 +49,46 @@
         element.classList.remove("error");
     };
 
+    const compactError = (value, max = 180) => {
+        const text = String(value || "")
+            .replace(/\s+/g, " ")
+            .trim();
+        if (!text) return "";
+        return text.length > max ? `${text.slice(0, max)}...` : text;
+    };
+
+    const parseApiError = async (response) => {
+        const status = response?.status;
+        let detail = "";
+        try {
+            const raw = await response.text();
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    detail = compactError(parsed?.error || parsed?.message || raw);
+                } catch {
+                    detail = compactError(raw);
+                }
+            }
+        } catch {
+            detail = "";
+        }
+
+        if (status === 401) {
+            return "Session admin invalide. Reconnectez-vous.";
+        }
+        if (status === 403) {
+            return "Email admin refuse cote serveur (ADMIN_EMAILS/public.admins).";
+        }
+        if (status === 500 && detail.includes("Missing server configuration")) {
+            return "Configuration serveur manquante (SUPABASE/RESEND/ADMIN_EMAILS).";
+        }
+        if (!detail) {
+            return `Erreur HTTP ${status || "inconnue"}.`;
+        }
+        return `HTTP ${status || "?"}: ${detail}`;
+    };
+
     const isAllowed = (email) => {
         if (!email) return false;
         if (allowlist.length === 0) return true;
@@ -351,7 +391,12 @@
         });
 
         if (insertError) {
-            showNotice(inviteNotice, "Impossible de generer le lien.", true);
+            const detail = compactError(insertError.message || insertError.details || insertError.code);
+            showNotice(
+                inviteNotice,
+                detail ? `Impossible de generer le lien: ${detail}` : "Impossible de generer le lien.",
+                true
+            );
             isInviting = false;
             if (submitBtn) submitBtn.disabled = false;
             return;
@@ -377,14 +422,16 @@
             });
 
             if (!response.ok) {
-                throw new Error("send failed");
+                const reason = await parseApiError(response);
+                showNotice(inviteNotice, `Invitation creee mais email non envoye: ${reason}`, true);
+                return;
             }
 
             showNotice(inviteNotice, `Invitation envoyee. Lien: ${commentUrl}`, false);
             inviteForm.reset();
             inviteForm.expires.value = "7";
         } catch (err) {
-            showNotice(inviteNotice, "Invitation creee mais email non envoye.", true);
+            showNotice(inviteNotice, "Invitation creee mais email non envoye: erreur reseau.", true);
         } finally {
             isInviting = false;
             if (submitBtn) submitBtn.disabled = false;
