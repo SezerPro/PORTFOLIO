@@ -1,0 +1,11 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "supa": "powershell -ExecutionPolicy Bypass -File .\\scripts\\supabase-with-env.ps1",
+    "supa:list": "powershell -ExecutionPolicy Bypass -File .\\scripts\\supabase-with-env.ps1 migration list",
+    "supa:push": "powershell -ExecutionPolicy Bypass -File .\\scripts\\supabase-with-env.ps1 db push",
+    "supa:pull": "powershell -ExecutionPolicy Bypass -File .\\scripts\\supabase-with-env.ps1 db pull"
+  }
+}

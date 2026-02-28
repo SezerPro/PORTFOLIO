@@ -62,6 +62,33 @@ module.exports = async (req, res) => {
         const user = await authResponse.json();
         const email = (user?.email || "").toLowerCase();
 
+        if (!email) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+
+        const adminCheckResponse = await fetch(
+            `${supabaseUrl}/rest/v1/admins?select=email&email=eq.${encodeURIComponent(email)}&limit=1`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    apikey: supabaseAnonKey
+                }
+            }
+        );
+
+        if (!adminCheckResponse.ok) {
+            console.error("send-invite: admin lookup failed", adminCheckResponse.status);
+            res.status(403).json({ error: "Forbidden" });
+            return;
+        }
+
+        const adminRows = await adminCheckResponse.json();
+        if (!Array.isArray(adminRows) || adminRows.length === 0) {
+            res.status(403).json({ error: "Forbidden" });
+            return;
+        }
+
         if (adminEmails.length > 0 && !adminEmails.includes(email)) {
             res.status(403).json({ error: "Forbidden" });
             return;

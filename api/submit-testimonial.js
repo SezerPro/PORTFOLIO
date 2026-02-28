@@ -108,6 +108,36 @@ module.exports = async (req, res) => {
                 return;
             }
 
+            try {
+                const rollbackResponse = await fetch(
+                    `${supabaseUrl}/rest/v1/comment_tokens?id=eq.${encodeURIComponent(tokenRow.id)}&used=is.true&used_at=eq.${encodeURIComponent(nowIso)}`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            apikey: serviceRoleKey,
+                            Authorization: `Bearer ${serviceRoleKey}`,
+                            "Content-Type": "application/json",
+                            Prefer: "return=minimal"
+                        },
+                        body: JSON.stringify({
+                            used: false,
+                            used_at: null
+                        })
+                    }
+                );
+
+                if (!rollbackResponse.ok) {
+                    const rollbackDetails = await rollbackResponse.text();
+                    console.error(
+                        "submit-testimonial: rollback failed",
+                        rollbackResponse.status,
+                        rollbackDetails
+                    );
+                }
+            } catch (rollbackError) {
+                console.error("submit-testimonial: rollback exception", rollbackError);
+            }
+
             res.status(500).json({ error: "Insert failed" });
             return;
         }
