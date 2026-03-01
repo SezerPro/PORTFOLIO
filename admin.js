@@ -344,67 +344,59 @@
         if (submitBtn) submitBtn.disabled = true;
         isInviting = true;
 
-        const session = await requireAdmin();
-        if (!session) {
-            isInviting = false;
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-        }
-
-        const name = inviteForm.clientName.value.trim();
-        const email = inviteForm.clientEmail.value.trim();
-        const language = inviteForm.language.value;
-        const expiresDays = clampDays(inviteForm.expires.value, 1, 30);
-        inviteForm.expires.value = String(expiresDays);
-
-        if (!name || !email) {
-            showNotice(inviteNotice, "Informations manquantes.", true);
-            isInviting = false;
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-        }
-
-        if (name.length > 120) {
-            showNotice(inviteNotice, "Nom trop long (120 caracteres max).", true);
-            isInviting = false;
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-        }
-
-        if (!isValidEmail(email)) {
-            showNotice(inviteNotice, "Email invalide.", true);
-            isInviting = false;
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-        }
-
-        const token = generateToken();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + expiresDays);
-
-        const { error: insertError } = await client.from("comment_tokens").insert({
-            token,
-            client_name: name,
-            client_email: email,
-            language,
-            expires_at: expiresAt.toISOString()
-        });
-
-        if (insertError) {
-            const detail = compactError(insertError.message || insertError.details || insertError.code);
-            showNotice(
-                inviteNotice,
-                detail ? `Impossible de generer le lien: ${detail}` : "Impossible de generer le lien.",
-                true
-            );
-            isInviting = false;
-            if (submitBtn) submitBtn.disabled = false;
-            return;
-        }
-
-        const commentUrl = buildCommentUrl(token, language);
-
         try {
+            showNotice(inviteNotice, "Traitement en cours...", false);
+
+            const session = await requireAdmin();
+            if (!session) {
+                return;
+            }
+
+            const name = inviteForm.clientName.value.trim();
+            const email = inviteForm.clientEmail.value.trim();
+            const language = inviteForm.language.value;
+            const expiresDays = clampDays(inviteForm.expires.value, 1, 30);
+            inviteForm.expires.value = String(expiresDays);
+
+            if (!name || !email) {
+                showNotice(inviteNotice, "Informations manquantes.", true);
+                return;
+            }
+
+            if (name.length > 120) {
+                showNotice(inviteNotice, "Nom trop long (120 caracteres max).", true);
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showNotice(inviteNotice, "Email invalide.", true);
+                return;
+            }
+
+            const token = generateToken();
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + expiresDays);
+
+            const { error: insertError } = await client.from("comment_tokens").insert({
+                token,
+                client_name: name,
+                client_email: email,
+                language,
+                expires_at: expiresAt.toISOString()
+            });
+
+            if (insertError) {
+                const detail = compactError(insertError.message || insertError.details || insertError.code);
+                showNotice(
+                    inviteNotice,
+                    detail ? `Impossible de generer le lien: ${detail}` : "Impossible de generer le lien.",
+                    true
+                );
+                return;
+            }
+
+            const commentUrl = buildCommentUrl(token, language);
+
             const response = await fetch(`${apiBase}/api/send-invite`, {
                 method: "POST",
                 headers: {
@@ -431,7 +423,14 @@
             inviteForm.reset();
             inviteForm.expires.value = "7";
         } catch (err) {
-            showNotice(inviteNotice, "Invitation creee mais email non envoye: erreur reseau.", true);
+            const detail = compactError(err?.message);
+            showNotice(
+                inviteNotice,
+                detail
+                    ? `Invitation creee mais email non envoye: erreur inattendue (${detail}).`
+                    : "Invitation creee mais email non envoye: erreur inattendue.",
+                true
+            );
         } finally {
             isInviting = false;
             if (submitBtn) submitBtn.disabled = false;
