@@ -12,6 +12,7 @@
 
     const PAGE_SIZE = 20;
     const POLL_INTERVAL_MS = 45000;
+    const REQUEST_TIMEOUT_MS = 15000;
 
     let pendingItems = [];
     let pendingOffset = 0;
@@ -88,6 +89,14 @@
         }
         return `HTTP ${status || "?"}: ${detail}`;
     };
+
+    const withTimeout = (promise, timeoutMs, timeoutMessage) =>
+        Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                window.setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+            })
+        ]);
 
     const isAllowed = (email) => {
         if (!email) return false;
@@ -349,6 +358,7 @@
 
             const session = await requireAdmin();
             if (!session) {
+                showNotice(inviteNotice, "Session admin invalide. Reconnectez-vous.", true);
                 return;
             }
 
@@ -377,13 +387,17 @@
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + expiresDays);
 
-            const { error: insertError } = await client.from("comment_tokens").insert({
-                token,
-                client_name: name,
-                client_email: email,
-                language,
-                expires_at: expiresAt.toISOString()
-            });
+            const { error: insertError } = await withTimeout(
+                client.from("comment_tokens").insert({
+                    token,
+                    client_name: name,
+                    client_email: email,
+                    language,
+                    expires_at: expiresAt.toISOString()
+                }),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de la creation du lien."
+            );
 
             if (insertError) {
                 const detail = compactError(insertError.message || insertError.details || insertError.code);
@@ -397,21 +411,25 @@
 
             const commentUrl = buildCommentUrl(token, language);
 
-            const response = await fetch(`${apiBase}/api/send-invite`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    email,
-                    name,
-                    language,
-                    token,
-                    commentUrl,
-                    expiresAt: expiresAt.toISOString()
-                })
-            });
+            const response = await withTimeout(
+                fetch(`${apiBase}/api/send-invite`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({
+                        email,
+                        name,
+                        language,
+                        token,
+                        commentUrl,
+                        expiresAt: expiresAt.toISOString()
+                    })
+                }),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de l'envoi de l'email."
+            );
 
             if (!response.ok) {
                 const reason = await parseApiError(response);
