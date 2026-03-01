@@ -47,6 +47,8 @@
   --shadow-1: 0 14px 30px rgba(0,0,0,.28);
   --shadow-2: 0 24px 60px rgba(0,0,0,.35);
 }
+/* Always honor hidden attribute even when classes define display. */
+[hidden] { display: none !important; }
 *,:before,:after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {

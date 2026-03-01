@@ -176,7 +176,6 @@
         } catch {
             setAuthenticated(false);
             stopPendingPolling();
-            showNotice(authNotice, "Session Supabase indisponible. Rechargez la page.", true);
             return null;
         }
 
