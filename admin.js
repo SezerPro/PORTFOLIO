@@ -13,6 +13,7 @@
     const PAGE_SIZE = 20;
     const POLL_INTERVAL_MS = 45000;
     const REQUEST_TIMEOUT_MS = 15000;
+    const WATCHDOG_TIMEOUT_MS = 20000;
 
     let pendingItems = [];
     let pendingOffset = 0;
@@ -98,6 +99,18 @@
             })
         ]);
 
+    const safeSignOut = async () => {
+        try {
+            await withTimeout(
+                client.auth.signOut(),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de la deconnexion."
+            );
+        } catch {
+            // Ignore hard failures: UI already switched to logged-out state.
+        }
+    };
+
     const isAllowed = (email) => {
         if (!email) return false;
         if (allowlist.length === 0) return true;
@@ -149,8 +162,24 @@
     };
 
     const requireAdmin = async () => {
-        const { data } = await client.auth.getSession();
-        const session = data?.session;
+        let session = null;
+        try {
+            const { data, error } = await withTimeout(
+                client.auth.getSession(),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de la verification de session."
+            );
+            if (error) {
+                throw error;
+            }
+            session = data?.session || null;
+        } catch {
+            setAuthenticated(false);
+            stopPendingPolling();
+            showNotice(authNotice, "Session Supabase indisponible. Rechargez la page.", true);
+            return null;
+        }
+
         if (!session) {
             setAuthenticated(false);
             stopPendingPolling();
@@ -159,7 +188,7 @@
 
         const email = session.user?.email || "";
         if (!isAllowed(email)) {
-            await client.auth.signOut();
+            await safeSignOut();
             setAuthenticated(false);
             stopPendingPolling();
             showNotice(authNotice, "Acces refuse.", true);
@@ -325,12 +354,22 @@
         isLoggingIn = true;
         if (submitBtn) submitBtn.disabled = true;
 
-        const { error } = await client.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: `${window.location.origin}/admin.html`
-            }
-        });
+        let error = null;
+        try {
+            const result = await withTimeout(
+                client.auth.signInWithOtp({
+                    email,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/admin.html`
+                    }
+                }),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de l'envoi du lien magique."
+            );
+            error = result?.error || null;
+        } catch (err) {
+            error = err;
+        }
 
         isLoggingIn = false;
         if (submitBtn) submitBtn.disabled = false;
@@ -352,6 +391,12 @@
         const submitBtn = inviteForm.querySelector("button[type='submit']");
         if (submitBtn) submitBtn.disabled = true;
         isInviting = true;
+        const inviteWatchdog = window.setTimeout(() => {
+            if (!isInviting) return;
+            isInviting = false;
+            if (submitBtn) submitBtn.disabled = false;
+            showNotice(inviteNotice, "Operation bloquee (timeout). Reessayez.", true);
+        }, WATCHDOG_TIMEOUT_MS);
 
         try {
             showNotice(inviteNotice, "Traitement en cours...", false);
@@ -450,6 +495,7 @@
                 true
             );
         } finally {
+            window.clearTimeout(inviteWatchdog);
             isInviting = false;
             if (submitBtn) submitBtn.disabled = false;
         }
@@ -466,9 +512,21 @@
     });
 
     logoutBtn?.addEventListener("click", async () => {
-        await client.auth.signOut();
         stopPendingPolling();
         setAuthenticated(false);
+        hideNotice(inviteNotice);
+        showNotice(authNotice, "Deconnexion en cours...", false);
+
+        try {
+            await withTimeout(
+                client.auth.signOut(),
+                REQUEST_TIMEOUT_MS,
+                "Timeout lors de la deconnexion."
+            );
+            hideNotice(authNotice);
+        } catch {
+            showNotice(authNotice, "Deconnexion locale effectuee (session distante incertaine).", true);
+        }
     });
 
     client.auth.onAuthStateChange(async () => {
